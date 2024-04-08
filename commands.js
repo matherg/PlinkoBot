@@ -18,28 +18,27 @@ function createCommandChoices() {
 }
 
 // Simple test command
-const TEST_COMMAND = {
-  name: 'test',
-  description: 'Basic command',
-  type: 1,
-};
 
-// Command containing options
-const CHALLENGE_COMMAND = {
-  name: 'challenge',
-  description: 'Challenge to a match of rock paper scissors',
+const END_POLL = {
+  name: 'endpoll',
+  description: 'Ends the most recent poll created',
+  type: 1,
+}
+const PLINKO_POLL = {
+  name: 'plinko_poll',
+  description: 'Create a poll with custom options',
   options: [
     {
-      type: 3,
-      name: 'object',
-      description: 'Pick your object',
+      type: 3, // STRING type
+      name: 'options',
+      description: 'Enter poll options separated by commas (e.g., "Option 1,Option 2,Option 3")',
       required: true,
-      choices: createCommandChoices(),
-    },
+    }
   ],
   type: 1,
 };
 
-const ALL_COMMANDS = [TEST_COMMAND, CHALLENGE_COMMAND];
+
+const ALL_COMMANDS = [PLINKO_POLL, END_POLL];
 
 InstallGlobalCommands(process.env.APP_ID, ALL_COMMANDS);
