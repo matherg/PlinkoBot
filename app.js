@@ -8,7 +8,6 @@ import {
   ButtonStyleTypes,
 } from 'discord-interactions';
 import { VerifyDiscordRequest, getRandomEmoji, DiscordRequest } from './utils.js';
-import { getShuffledOptions, getResult } from './game.js';
 import cors from 'cors'; // Import the CORS package
 
 
@@ -110,7 +109,7 @@ function createPollButtons(options) {
       type: MessageComponentTypes.BUTTON,
       style: ButtonStyleTypes.LINK,
       label: 'Launch Poll',
-      url: `http://localhost:8080/${nextPollId}`, // The URL the button directs to
+      url: `https://master--plinkopoll.netlify.app/${nextPollId}`, // The URL the button directs to
     }]
   };
 
@@ -122,7 +121,7 @@ function createPollButtons(options) {
 
 
 // Endpoint to get poll data
-app.get('/getPoll/:id',cors({ origin: 'http://localhost:8080' }), function (req, res) {
+app.get('/getPoll/:id',cors({ origin: 'https://master--plinkopoll.netlify.app/' }), function (req, res) {
   const pollId = req.params.id;
   if (polls[pollId]) {
     res.json({
@@ -139,7 +138,7 @@ app.get('/getPoll/:id',cors({ origin: 'http://localhost:8080' }), function (req,
     res.status(404).send('Poll not found');
   }
 });
-app.post('/endpoll/:id/:userId/:option/:numOptions', cors({ origin: 'http://localhost:8080' }), async function (req, res) {
+app.post('/endpoll/:id/:userId/:option/:numOptions', cors({ origin: 'https://master--plinkopoll.netlify.app/' }), async function (req, res) {
   const pollId = req.params.id;
   const userId = req.params.userId; // or null if no winner
   const winningOption = req.params.option; // or null if no winning option
