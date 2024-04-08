@@ -121,7 +121,7 @@ function createPollButtons(options) {
 
 
 // Endpoint to get poll data
-app.get('/getPoll/:id',cors({ origin: 'https://master--plinkopoll.netlify.app/' }), function (req, res) {
+app.get('/getPoll/:id',cors({ origin: 'https://master--plinkopoll.netlify.app' }), function (req, res) {
   const pollId = req.params.id;
   if (polls[pollId]) {
     res.json({
@@ -138,7 +138,7 @@ app.get('/getPoll/:id',cors({ origin: 'https://master--plinkopoll.netlify.app/' 
     res.status(404).send('Poll not found');
   }
 });
-app.post('/endpoll/:id/:userId/:option/:numOptions', cors({ origin: 'https://master--plinkopoll.netlify.app/' }), async function (req, res) {
+app.post('/endpoll/:id/:userId/:option/:numOptions', cors({ origin: 'https://master--plinkopoll.netlify.app' }), async function (req, res) {
   const pollId = req.params.id;
   const userId = req.params.userId; // or null if no winner
   const winningOption = req.params.option; // or null if no winning option
