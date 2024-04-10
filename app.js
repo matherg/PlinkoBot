@@ -10,7 +10,8 @@ import {
 
 import { VerifyDiscordRequest, getRandomEmoji, DiscordRequest } from './utils.js';
 import cors from 'cors';
-import {AttachmentBuilder} from "discord.js"; // Import the CORS package
+import {AttachmentBuilder} from "discord.js";
+import * as fs from "node:fs"; // Import the CORS package
 const corsOptions = {
   origin: 'https://master--plinkopoll.netlify.app',
   methods: 'POST',
@@ -21,24 +22,24 @@ const corsOptions = {
 // Create an express app
 const app = express();
 
+
 // Get port, or default to 3000
 const PORT = process.env.PORT || 3000;
 // Parse request body and verifies incoming requests using discord-interactions package
 app.use(express.json());
 app.use(cors(corsOptions));
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
+
 // Store for in-progress games. In production, you'd want to use a DB
 const pollMessages = {};
 const polls = {};
 let nextPollId = 0;
-async function sendDiscordMessage(channelId, content, video) {
+async function sendDiscordMessage(channelId, content, videoPath) {
   const url = `https://discord.com/api/v10/channels/${channelId}/messages`;
   const formData = new FormData();
   formData.append('content', content);
-
-    formData.append('payload_json', JSON.stringify({
-      attachments: [{ id: 0, filename: 'replay.webm', description: 'Replay!' }]
-    }));
-    formData.append('files[0]', fetch(video).then(res => res.body), 'replay.webm');
+  formData.append('files[0]', fs.createReadStream(videoPath));
 
   const response = await fetch(url, {
     method: 'POST',
@@ -152,9 +153,9 @@ app.get('/getPoll/:id', function (req, res) {
     res.status(404).send('Poll not found');
   }
 });
-app.post('/endpoll', async function (req, res) {
-  const { userId, pollId, option, numOptions, videoUrl } = req.body;
-  console.log("WE TRIED TO END THE POLL\n")
+app.post('/endpoll', upload.single('replay'), async function (req, res) {
+  const { userId, pollId, option, numOptions } = req.body;
+  const replay = req.file;
   console.log(req.body)
   if (polls[pollId]) {
     const pollMessage = pollMessages[pollId];
@@ -171,8 +172,7 @@ app.post('/endpoll', async function (req, res) {
     // Send a message with who won the poll and what option they chose
     const messageContent = `||<@${userId}> won the poll with option: ${option}\nOut of ${numOptions} total votes||`;
     delete polls[pollId];
-    const videoAttachment = new AttachmentBuilder(videoUrl)
-    await sendDiscordMessage(pollMessage.channelId, messageContent, videoAttachment);
+    await sendDiscordMessage(pollMessage.channelId, messageContent, replay.path);
 
     res.setHeader('Access-Control-Allow-Origin', 'https://master--plinkopoll.netlify.app');
     res.json({ message: 'Poll ended successfully, winner announced.' });
