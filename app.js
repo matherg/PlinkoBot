@@ -154,6 +154,7 @@ app.get('/getPoll/:id',cors(), function (req, res) {
 });
 app.post('/endpoll',cors(), async function (req, res) {
   const { userId, pollId, option, numOptions, videoUrl } = req.body;
+  console.log("WE TRIED TO END THE POLL\n")
   if (polls[pollId]) {
     const pollMessage = pollMessages[pollId];
     if (pollMessage) {
