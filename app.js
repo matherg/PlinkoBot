@@ -40,8 +40,12 @@ let nextPollId = 0;
 async function sendDiscordMessage(channelId, content, videoPath) {
   const url = `https://discord.com/api/v10/channels/${channelId}/messages`;
   const formData = new FormData();
+
   formData.append('content', content);
-  formData.append('files[0]', fs.createReadStream(videoPath), 'replay.webm');
+  formData.append('files[0]', fs.createReadStream(videoPath), {
+    filename: 'replay.webm',
+    contentType: 'video/webm',
+  });
 
   const response = await fetch(url, {
     method: 'POST',
@@ -55,6 +59,13 @@ async function sendDiscordMessage(channelId, content, videoPath) {
     // Handle any errors if the request was not successful
     throw new Error(`Failed to send message: ${response.statusText}`);
   }
+  fs.unlink(videoPath, (err) => {
+    if (err) {
+      console.error(`Error deleting file ${videoPath}: ${err}`);
+    } else {
+      console.log(`File ${videoPath} was deleted successfully`);
+    }
+  });
 }
 async function deleteDiscordMessage(channelId, messageId) {
   const url = `https://discord.com/api/v10/channels/${channelId}/messages/${messageId}`;
