@@ -135,7 +135,7 @@ function createPollButtons(options) {
 
 
 // Endpoint to get poll data
-app.get('/getPoll/:id',cors(), function (req, res) {
+app.get('/getPoll/:id', function (req, res) {
   const pollId = req.params.id;
   if (polls[pollId]) {
     res.json({
@@ -152,7 +152,7 @@ app.get('/getPoll/:id',cors(), function (req, res) {
     res.status(404).send('Poll not found');
   }
 });
-app.post('/endpoll',cors(), async function (req, res) {
+app.post('/endpoll', async function (req, res) {
   const { userId, pollId, option, numOptions, videoUrl } = req.body;
   console.log("WE TRIED TO END THE POLL\n")
   console.log(req.body)
