@@ -41,7 +41,7 @@ async function sendDiscordMessage(channelId, content, videoPath) {
   const url = `https://discord.com/api/v10/channels/${channelId}/messages`;
   const formData = new FormData();
   formData.append('content', content);
-  formData.append('files[0]', fs.createReadStream(videoPath));
+  formData.append('files[0]', fs.createReadStream(videoPath), 'replay.webm');
 
   const response = await fetch(url, {
     method: 'POST',
