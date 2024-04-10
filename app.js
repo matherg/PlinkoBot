@@ -11,7 +11,12 @@ import {
 import { VerifyDiscordRequest, getRandomEmoji, DiscordRequest } from './utils.js';
 import cors from 'cors';
 import {AttachmentBuilder} from "discord.js"; // Import the CORS package
-
+const corsOptions = {
+  origin: 'https://master--plinkopoll.netlify.app',
+  methods: 'POST',
+  allowedHeaders: 'Content-Type',
+  optionsSuccessStatus: 200
+};
 
 // Create an express app
 const app = express();
@@ -20,9 +25,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 // Parse request body and verifies incoming requests using discord-interactions package
 app.use(express.json({ verify: VerifyDiscordRequest(process.env.PUBLIC_KEY) }));
-app.use(cors({
-  origin: 'https://master--plinkopoll.netlify.app' // or '*' to allow all origins
-}));
+app.use(cors(corsOptions));
 // Store for in-progress games. In production, you'd want to use a DB
 const pollMessages = {};
 const polls = {};
