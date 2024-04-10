@@ -155,6 +155,7 @@ app.get('/getPoll/:id',cors(), function (req, res) {
 app.post('/endpoll',cors(), async function (req, res) {
   const { userId, pollId, option, numOptions, videoUrl } = req.body;
   console.log("WE TRIED TO END THE POLL\n")
+  console.log(req.body)
   if (polls[pollId]) {
     const pollMessage = pollMessages[pollId];
     if (pollMessage) {
@@ -171,7 +172,6 @@ app.post('/endpoll',cors(), async function (req, res) {
     const messageContent = `||<@${userId}> won the poll with option: ${option}\nOut of ${numOptions} total votes||`;
     delete polls[pollId];
     const videoAttachment = new AttachmentBuilder(videoUrl)
-
     await sendDiscordMessage(pollMessage.channelId, messageContent, videoAttachment);
 
     res.setHeader('Access-Control-Allow-Origin', 'https://master--plinkopoll.netlify.app');
