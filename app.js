@@ -148,12 +148,8 @@ app.get('/getPoll/:id',cors({ origin: 'https://master--plinkopoll.netlify.app' }
     res.status(404).send('Poll not found');
   }
 });
-app.post('/endpoll/:id/:userId/:option/:numOptions/:videoUrl', cors({ origin: 'https://master--plinkopoll.netlify.app' }), async function (req, res) {
-  const pollId = req.params.id;
-  const userId = req.params.userId; // or null if no winner
-  const winningOption = req.params.option; // or null if no winning option
-  const numOptions = req.params.numOptions; // or null if no winning option
-  const videoUrl = req.params.videoUrl;
+app.post(cors({ origin: 'https://master--plinkopoll.netlify.app' }), async function (req, res) {
+  const { userId, pollId, option, numOptions, videoUrl } = req.body;
   if (polls[pollId]) {
     const pollMessage = pollMessages[pollId];
     if (pollMessage) {
@@ -170,7 +166,7 @@ app.post('/endpoll/:id/:userId/:option/:numOptions/:videoUrl', cors({ origin: 'h
     // Clear the poll data
 
     // Send a message with who won the poll and what option they chose
-    const messageContent = `<@${userId}> won the poll with option: ${winningOption}\nOut of ${numOptions} total votes`;
+    const messageContent = `<@${userId}> won the poll with option: ${option}\nOut of ${numOptions} total votes`;
     delete polls[pollId];
     const videoAttachment = new AttachmentBuilder(videoUrl)
     // Assuming you have a function to send Discord messages
