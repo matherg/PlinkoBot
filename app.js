@@ -20,8 +20,9 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 // Parse request body and verifies incoming requests using discord-interactions package
 app.use(express.json({ verify: VerifyDiscordRequest(process.env.PUBLIC_KEY) }));
-app.use(cors());
-
+app.use(cors({
+  origin: 'https://master--plinkopoll.netlify.app' // or '*' to allow all origins
+}));
 // Store for in-progress games. In production, you'd want to use a DB
 const pollMessages = {};
 const polls = {};
@@ -131,7 +132,7 @@ function createPollButtons(options) {
 
 
 // Endpoint to get poll data
-app.get('/getPoll/:id',cors({ origin: 'https://master--plinkopoll.netlify.app' }), function (req, res) {
+app.get('/getPoll/:id',cors(), function (req, res) {
   const pollId = req.params.id;
   if (polls[pollId]) {
     res.json({
@@ -148,7 +149,7 @@ app.get('/getPoll/:id',cors({ origin: 'https://master--plinkopoll.netlify.app' }
     res.status(404).send('Poll not found');
   }
 });
-app.post('/endpoll',cors({ origin: 'https://master--plinkopoll.netlify.app' }), async function (req, res) {
+app.post('/endpoll',cors(), async function (req, res) {
   const { userId, pollId, option, numOptions, videoUrl } = req.body;
   if (polls[pollId]) {
     const pollMessage = pollMessages[pollId];
@@ -161,19 +162,15 @@ app.post('/endpoll',cors({ origin: 'https://master--plinkopoll.netlify.app' }), 
         return res.status(500).send('Failed to delete Discord message.');
       }
     }
-
-
     // Clear the poll data
-
     // Send a message with who won the poll and what option they chose
-    const messageContent = `<@${userId}> won the poll with option: ${option}\nOut of ${numOptions} total votes`;
+    const messageContent = `||<@${userId}> won the poll with option: ${option}\nOut of ${numOptions} total votes||`;
     delete polls[pollId];
     const videoAttachment = new AttachmentBuilder(videoUrl)
-    // Assuming you have a function to send Discord messages
 
     await sendDiscordMessage(pollMessage.channelId, messageContent, videoAttachment);
 
-    // Respond to the request to indicate the poll has been ended
+    res.setHeader('Access-Control-Allow-Origin', 'https://master--plinkopoll.netlify.app');
     res.json({ message: 'Poll ended successfully, winner announced.' });
   } else {
     res.status(404).send('Poll not found or it has already ended.');
