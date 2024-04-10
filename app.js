@@ -24,7 +24,7 @@ const app = express();
 // Get port, or default to 3000
 const PORT = process.env.PORT || 3000;
 // Parse request body and verifies incoming requests using discord-interactions package
-app.use(express.json({ verify: VerifyDiscordRequest(process.env.PUBLIC_KEY) }));
+app.use(express.json());
 app.use(cors(corsOptions));
 // Store for in-progress games. In production, you'd want to use a DB
 const pollMessages = {};
@@ -182,7 +182,7 @@ app.post('/endpoll',cors(), async function (req, res) {
   /**
    * Handle slash command requests
    */
-  app.post('/interactions', async function (req, res) {
+  app.post('/interactions',express.json({ verify: VerifyDiscordRequest(process.env.PUBLIC_KEY) }), async function (req, res) {
     // Interaction type and data
     const {type, data, member, channel_id} = req.body;
     /**
