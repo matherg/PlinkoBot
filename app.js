@@ -148,7 +148,7 @@ app.get('/getPoll/:id',cors({ origin: 'https://master--plinkopoll.netlify.app' }
     res.status(404).send('Poll not found');
   }
 });
-app.post(cors({ origin: 'https://master--plinkopoll.netlify.app' }), async function (req, res) {
+app.post('/endpoll',cors({ origin: 'https://master--plinkopoll.netlify.app' }), async function (req, res) {
   const { userId, pollId, option, numOptions, videoUrl } = req.body;
   if (polls[pollId]) {
     const pollMessage = pollMessages[pollId];
