@@ -29,7 +29,9 @@ const PORT = process.env.PORT || 3000;
 // Parse request body and verifies incoming requests using discord-interactions package
 app.use(express.json());
 app.use(cors(corsOptions));
-const upload = multer({ dest: 'uploads/' });
+const upload = multer(
+    { dest: 'uploads/', limits: { fileSize: 100000000 }
+});
 
 // Store for in-progress games. In production, you'd want to use a DB
 const pollMessages = {};
