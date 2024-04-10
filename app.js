@@ -27,7 +27,7 @@ const app = express();
 // Get port, or default to 3000
 const PORT = process.env.PORT || 3000;
 // Parse request body and verifies incoming requests using discord-interactions package
-app.use(express.json());
+app.use(express.json({ verify: VerifyDiscordRequest(process.env.PUBLIC_KEY) }));
 app.use(cors(corsOptions));
 const upload = multer(
     { dest: 'uploads/', limits: { fileSize: 100000000 }
