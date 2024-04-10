@@ -7,25 +7,35 @@ import {
   MessageComponentTypes,
   ButtonStyleTypes,
 } from 'discord-interactions';
+
 import { VerifyDiscordRequest, getRandomEmoji, DiscordRequest } from './utils.js';
-import cors from 'cors'; // Import the CORS package
+import cors from 'cors';
+import {AttachmentBuilder} from "discord.js"; // Import the CORS package
 
 
 // Create an express app
 const app = express();
-app.options('*', cors()); // Add preflight handling for all routes
 
 // Get port, or default to 3000
 const PORT = process.env.PORT || 3000;
 // Parse request body and verifies incoming requests using discord-interactions package
 app.use(express.json({ verify: VerifyDiscordRequest(process.env.PUBLIC_KEY) }));
+app.use(cors());
 
 // Store for in-progress games. In production, you'd want to use a DB
 const pollMessages = {};
 const polls = {};
 let nextPollId = 0;
-async function sendDiscordMessage(channelId, content) {
+async function sendDiscordMessage(channelId, content, video) {
   const url = `https://discord.com/api/v10/channels/${channelId}/messages`;
+  const formData = new FormData();
+  formData.append('content', content);
+
+    formData.append('payload_json', JSON.stringify({
+      attachments: [{ id: 0, filename: 'replay.webm', description: 'Replay!' }]
+    }));
+    formData.append('files[0]', fetch(video).then(res => res.body), 'replay.webm');
+
   const response = await fetch(url, {
     method: 'POST',
     headers: {
@@ -138,12 +148,12 @@ app.get('/getPoll/:id',cors({ origin: 'https://master--plinkopoll.netlify.app' }
     res.status(404).send('Poll not found');
   }
 });
-app.post('/endpoll/:id/:userId/:option/:numOptions', cors({ origin: 'https://master--plinkopoll.netlify.app' }), async function (req, res) {
+app.post('/endpoll/:id/:userId/:option/:numOptions/:videoUrl', cors({ origin: 'https://master--plinkopoll.netlify.app' }), async function (req, res) {
   const pollId = req.params.id;
   const userId = req.params.userId; // or null if no winner
   const winningOption = req.params.option; // or null if no winning option
   const numOptions = req.params.numOptions; // or null if no winning option
-
+  const videoUrl = req.params.videoUrl;
   if (polls[pollId]) {
     const pollMessage = pollMessages[pollId];
     if (pollMessage) {
@@ -162,9 +172,10 @@ app.post('/endpoll/:id/:userId/:option/:numOptions', cors({ origin: 'https://mas
     // Send a message with who won the poll and what option they chose
     const messageContent = `<@${userId}> won the poll with option: ${winningOption}\nOut of ${numOptions} total votes`;
     delete polls[pollId];
-
+    const videoAttachment = new AttachmentBuilder(videoUrl)
     // Assuming you have a function to send Discord messages
-    await sendDiscordMessage(pollMessage.channelId, messageContent);
+
+    await sendDiscordMessage(pollMessage.channelId, messageContent, videoAttachment);
 
     // Respond to the request to indicate the poll has been ended
     res.json({ message: 'Poll ended successfully, winner announced.' });
