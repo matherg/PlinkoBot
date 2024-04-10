@@ -12,7 +12,8 @@ import { VerifyDiscordRequest, getRandomEmoji, DiscordRequest } from './utils.js
 import cors from 'cors';
 import multer  from 'multer';
 import {AttachmentBuilder} from "discord.js";
-import * as fs from "node:fs"; // Import the CORS package
+import * as fs from "node:fs";
+import * as path from "node:path"; // Import the CORS package
 const corsOptions = {
   origin: 'https://master--plinkopoll.netlify.app',
   methods: 'POST',
@@ -42,10 +43,12 @@ async function sendDiscordMessage(channelId, content, videoPath) {
   const formData = new FormData();
 
   formData.append('content', content);
-  formData.append('files[0]', fs.createReadStream(videoPath), {
-    filename: 'replay.webm',
-    contentType: 'video/webm',
-  });
+  if (fs.existsSync(videoPath)) {
+    formData.append('files[0]', fs.createReadStream(videoPath));
+  } else {
+    console.error('File does not exist:', videoPath);
+    return;
+  }
 
   const response = await fetch(url, {
     method: 'POST',
