@@ -10,6 +10,7 @@ import {
 
 import { VerifyDiscordRequest, getRandomEmoji, DiscordRequest } from './utils.js';
 import cors from 'cors';
+import multer  from 'multer';
 import {AttachmentBuilder} from "discord.js";
 import * as fs from "node:fs"; // Import the CORS package
 const corsOptions = {
@@ -28,7 +29,6 @@ const PORT = process.env.PORT || 3000;
 // Parse request body and verifies incoming requests using discord-interactions package
 app.use(express.json());
 app.use(cors(corsOptions));
-const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 
 // Store for in-progress games. In production, you'd want to use a DB
