@@ -47,7 +47,6 @@ async function sendDiscordMessage(channelId, content, videoPath) {
     method: 'POST',
     headers: {
       Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
-      'Content-Type': 'application/json',
     },
     body: JSON.stringify({ content })
   });
@@ -172,7 +171,7 @@ app.post('/endpoll', upload.single('replay'), async function (req, res) {
     }
     // Clear the poll data
     // Send a message with who won the poll and what option they chose
-    const messageContent = `||<@${userId}> won the poll with option: ${option}\nOut of ${optionNum} total votes||`;
+    const messageContent = `POLL ENDED: ||<@${userId}> won with option: ${option}\nOut of ${optionNum} votes||`;
     delete polls[pollId];
     await sendDiscordMessage(pollMessage.channelId, messageContent, replay.path);
 
