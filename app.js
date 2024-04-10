@@ -156,9 +156,9 @@ app.get('/getPoll/:id', function (req, res) {
   }
 });
 app.post('/endpoll', upload.single('replay'), async function (req, res) {
-  const { userId, pollId, option, numOptions } = req.body;
+  const { userId, pollId, option, optionNum } = req.body;
   const replay = req.file;
-  console.log(req.body)
+  console.log(replay.path)
   if (polls[pollId]) {
     const pollMessage = pollMessages[pollId];
     if (pollMessage) {
@@ -172,7 +172,7 @@ app.post('/endpoll', upload.single('replay'), async function (req, res) {
     }
     // Clear the poll data
     // Send a message with who won the poll and what option they chose
-    const messageContent = `||<@${userId}> won the poll with option: ${option}\nOut of ${numOptions} total votes||`;
+    const messageContent = `||<@${userId}> won the poll with option: ${option}\nOut of ${optionNum} total votes||`;
     delete polls[pollId];
     await sendDiscordMessage(pollMessage.channelId, messageContent, replay.path);
 
