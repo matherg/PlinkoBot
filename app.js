@@ -41,15 +41,11 @@ let nextPollId = 0;
 async function sendDiscordMessage(channelId, content, videoPath) {
   const url = `https://discord.com/api/v10/channels/${channelId}/messages`;
   const formData = new FormData();
-  formData.append('content', content);
-  const stats = fs.statSync('assets/replay.mp4');
-  console.log(stats.size)
-  if (fs.existsSync(videoPath)) {
-    formData.append('files[0]', fs.createReadStream('assets/replay.mp4'));
-  } else {
-    console.error('File does not exist:', videoPath);
-    return;
-  }
+  formData.append('payload_json', JSON.stringify({ content }));
+
+  // Append the video file
+  formData.append('files[0]', fs.createReadStream(videoPath));
+
 
   const response = await fetch(url, {
     method: 'POST',
