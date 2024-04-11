@@ -64,6 +64,7 @@ async function sendDiscordMessage(channelId, content, videoPath) {
     // Handle any errors if the request was not successful
     throw new Error(`Failed to send message: ${response.statusText}`);
   }
+  console.log(response)
   fs.unlink(videoPath, (err) => {
     if (err) {
       console.error(`Error deleting file ${videoPath}: ${err}`);
