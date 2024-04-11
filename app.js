@@ -13,7 +13,7 @@ import cors from 'cors';
 import multer  from 'multer';
 import {AttachmentBuilder} from "discord.js";
 import * as fs from "node:fs";
-import * as fd from 'form-data';
+import FormData from "form-data";
 const corsOptions = {
   origin: 'https://master--plinkopoll.netlify.app',
   methods: 'POST',
@@ -40,7 +40,7 @@ const polls = {};
 let nextPollId = 0;
 async function sendDiscordMessage(channelId, content, videoPath) {
   const url = `https://discord.com/api/v10/channels/${channelId}/messages`;
-  const formData = new fd.FormData();
+  const formData = new FormData();
   formData.append('content', content);
   const stats = fs.statSync(videoPath);
   console.log(stats.size)
@@ -61,7 +61,6 @@ async function sendDiscordMessage(channelId, content, videoPath) {
   });
 console.log(formData);
   if (!response.ok) {
-    // Handle any errors if the request was not successful
     throw new Error(`Failed to send message: ${response.statusText}`);
   }
   console.log(response)
