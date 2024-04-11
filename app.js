@@ -55,7 +55,7 @@ async function sendDiscordMessage(channelId, content, videoPath) {
     method: 'POST',
     headers: {
       Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
-      ...formData.getHeaders()
+      //...formData.getHeaders()
     },
     body: formData
   });
