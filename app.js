@@ -41,7 +41,6 @@ let nextPollId = 0;
 async function sendDiscordMessage(channelId, content, videoPath) {
   const url = `https://discord.com/api/v10/channels/${channelId}/messages`;
   const formData = new FormData();
-
   formData.append('content', content);
   const stats = fs.statSync(videoPath);
   console.log(stats.size)
@@ -55,11 +54,12 @@ async function sendDiscordMessage(channelId, content, videoPath) {
   const response = await fetch(url, {
     method: 'POST',
     headers: {
-      Authorization: `Bot ${process.env.DISCORD_TOKEN}`
+      Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
+      ...formData.getHeaders()
     },
     body: formData
   });
-
+console.log(formData);
   if (!response.ok) {
     // Handle any errors if the request was not successful
     throw new Error(`Failed to send message: ${response.statusText}`);
