@@ -42,10 +42,10 @@ async function sendDiscordMessage(channelId, content, videoPath) {
   const url = `https://discord.com/api/v10/channels/${channelId}/messages`;
   const formData = new FormData();
   formData.append('content', content);
-  const stats = fs.statSync('/assets/replay.mp4');
+  const stats = fs.statSync('assets/replay.mp4');
   console.log(stats.size)
   if (fs.existsSync(videoPath)) {
-    formData.append('files[0]', fs.createReadStream('/assets/replay.mp4'));
+    formData.append('files[0]', fs.createReadStream('assets/replay.mp4'));
   } else {
     console.error('File does not exist:', videoPath);
     return;
@@ -174,7 +174,6 @@ app.get('/getPoll/:id', function (req, res) {
 app.post('/endpoll', upload.single('replay'), async function (req, res) {
   const { userId, pollId, option, optionNum } = req.body;
   const replay = req.file;
-  console.log(replay.path)
   if (polls[pollId]) {
     const pollMessage = pollMessages[pollId];
     if (pollMessage) {
