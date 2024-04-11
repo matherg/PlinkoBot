@@ -43,6 +43,8 @@ async function sendDiscordMessage(channelId, content, videoPath) {
   const formData = new FormData();
 
   formData.append('content', content);
+  const stats = fs.statSync(videoPath);
+  console.log(stats.size)
   if (fs.existsSync(videoPath)) {
     formData.append('files[0]', fs.createReadStream(videoPath));
   } else {
@@ -53,8 +55,7 @@ async function sendDiscordMessage(channelId, content, videoPath) {
   const response = await fetch(url, {
     method: 'POST',
     headers: {
-      Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
-
+      Authorization: `Bot ${process.env.DISCORD_TOKEN}`
     },
     body: formData
   });
