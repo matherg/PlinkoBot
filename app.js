@@ -61,6 +61,7 @@ async function sendDiscordMessage(channelId, content, videoPath) {
   });
 console.log(formData);
   if (!response.ok) {
+    console.log(response);
     throw new Error(`Failed to send message: ${response.statusText}`);
   }
   console.log(response)
