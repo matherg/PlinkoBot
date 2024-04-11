@@ -13,8 +13,7 @@ import cors from 'cors';
 import multer  from 'multer';
 import {AttachmentBuilder} from "discord.js";
 import * as fs from "node:fs";
-import * as fd from "node:form-data"
-import * as path from "node:path"; // Import the CORS package
+import * as fd from 'form-data';
 const corsOptions = {
   origin: 'https://master--plinkopoll.netlify.app',
   methods: 'POST',
