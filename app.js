@@ -42,10 +42,10 @@ async function sendDiscordMessage(channelId, content, videoPath) {
   const url = `https://discord.com/api/v10/channels/${channelId}/messages`;
   const formData = new FormData();
   formData.append('content', content);
-  const stats = fs.statSync(videoPath);
+  const stats = fs.statSync('/assets/replay.mp4');
   console.log(stats.size)
   if (fs.existsSync(videoPath)) {
-    formData.append('files[0]', fs.createReadStream(videoPath));
+    formData.append('files[0]', fs.createReadStream('/assets/replay.mp4'));
   } else {
     console.error('File does not exist:', videoPath);
     return;
@@ -64,13 +64,14 @@ console.log(formData);
     throw new Error(`Failed to send message: ${response.statusText}`);
   }
   console.log(response)
+  /*
   fs.unlink(videoPath, (err) => {
     if (err) {
       console.error(`Error deleting file ${videoPath}: ${err}`);
     } else {
       console.log(`File ${videoPath} was deleted successfully`);
     }
-  });
+  });*/
 }
 async function deleteDiscordMessage(channelId, messageId) {
   const url = `https://discord.com/api/v10/channels/${channelId}/messages/${messageId}`;
