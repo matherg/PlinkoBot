@@ -8,10 +8,11 @@ import {
   ButtonStyleTypes,
 } from 'discord-interactions';
 
+import { Client,Events, AttachmentBuilder,GatewayIntentBits, EmbedBuilder, ButtonBuilder, ActionRowBuilder } from 'discord.js';
+
 import { VerifyDiscordRequest, getRandomEmoji, DiscordRequest } from './utils.js';
 import cors from 'cors';
 import multer  from 'multer';
-import {AttachmentBuilder} from "discord.js";
 import * as fs from "node:fs";
 import FormData from "form-data";
 const corsOptions = {
@@ -23,7 +24,19 @@ const corsOptions = {
 
 // Create an express app
 const app = express();
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent
+  ]
+});
+client.once(Events.ClientReady, readyClient => {
+  console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+});
 
+// Log in to Discord with your client's token
+client.login(process.env.DISCORD_TOKEN);
 
 // Get port, or default to 3000
 const PORT = process.env.PORT || 3000;
@@ -38,6 +51,7 @@ const upload = multer(
 const pollMessages = {};
 const polls = {};
 let nextPollId = 0;
+/*
 async function sendDiscordMessage(channelId, content, videoPath) {
   const url = `https://discord.com/api/v10/channels/${channelId}/messages`;
   const formData = new FormData();
@@ -61,14 +75,14 @@ console.log(formData);
     throw new Error(`Failed to send message: ${response.statusText}`);
   }
   console.log(response)
-  /*
+
   fs.unlink(videoPath, (err) => {
     if (err) {
       console.error(`Error deleting file ${videoPath}: ${err}`);
     } else {
       console.log(`File ${videoPath} was deleted successfully`);
     }
-  });*/
+  });
 }
 async function deleteDiscordMessage(channelId, messageId) {
   const url = `https://discord.com/api/v10/channels/${channelId}/messages/${messageId}`;
@@ -82,6 +96,25 @@ async function deleteDiscordMessage(channelId, messageId) {
   if (!response.ok) {
     // Handle any errors if the request was not successful
     throw new Error(`Failed to delete message: ${response.statusText}`);
+  }
+}*/
+async function sendDiscordMessage(channelId, content, videoPath) {
+  try {
+    const channel = await client.channels.fetch(channelId);
+    const file = new AttachmentBuilder('assets/replay.mp4', { name: 'replay.mp4' });
+    await channel.send({ content, files: [file] });
+  } catch (error) {
+    console.error('Error sending message:', error);
+  }
+}
+
+async function deleteDiscordMessage(channelId, messageId) {
+  try {
+    const channel = await client.channels.fetch(channelId);
+    const message = await channel.messages.fetch(messageId);
+    await message.delete();
+  } catch (error) {
+    console.error('Error deleting message:', error);
   }
 }
 // Helper function to update poll votes
@@ -149,7 +182,52 @@ function createPollButtons(options) {
  * Interactions endpoint URL where Discord will send HTTP requests
  */
 
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isCommand() && !interaction.isMessageComponent()) return;
 
+  const { custom_id, user, member, message, channelId } = interaction;
+  if (interaction.isMessageComponent()) {
+    if (custom_id.startsWith('poll_vote_')) {
+      const userId = member.user.id; // The user's Discord ID
+      const username = member.user.username; // The user's username
+      const avatar = member.user.avatar; // The user's avatar hash
+      const avatarURL = `https://cdn.discordapp.com/avatars/${userId}/${avatar}.png`; // Construct the URL for the avatar
+
+      handleVote(custom_id, userId, username, avatarURL);
+
+      await interaction.update({ content: `Thanks for voting, ${user.username}!`, components: [] });
+    }
+  } else if (interaction.isCommand()) {
+    if (interaction.commandName === 'endpoll') {
+      const pollId = interaction.options.getInteger('poll_id');
+      const poll = polls[pollId];
+      if (poll) {
+        await deleteDiscordMessage(poll.channelId, poll.messageId);
+        delete polls[pollId];
+        await interaction.reply('Poll ended.');
+      } else {
+        await interaction.reply('Poll not found.');
+      }
+    } else if  (interaction.commandName === 'plinko_poll') {
+      const optionsString = options.getString('options');
+      const pollOptions = optionsString.split(',').map(option => option.trim());
+
+      const components = createPollButtons(pollOptions);
+      nextPollId++;
+      polls[nextPollId] = { options: {}, voters: {}, userDetails: {}, pollOptions: pollOptions };
+
+      await interaction.reply({
+        content: 'Vote Now!',
+        components: components
+      });
+
+      pollMessages[nextPollId] = {
+        channelId: interaction.channelId,
+        messageId: interaction.message.id
+      };
+    }
+  }
+});
 // Endpoint to get poll data
 app.get('/getPoll/:id', function (req, res) {
   const pollId = req.params.id;
@@ -194,15 +272,12 @@ app.post('/endpoll', upload.single('replay'), async function (req, res) {
     res.status(404).send('Poll not found or it has already ended.');
   }
 });
-  /**
-   * Handle slash command requests
-   */
+
+   /*
   app.post('/interactions',express.json({ verify: VerifyDiscordRequest(process.env.PUBLIC_KEY) }), async function (req, res) {
     // Interaction type and data
     const {type, data, member, channel_id} = req.body;
-    /**
-     * Handle verification requests
-     */
+
     if (type === InteractionType.PING) {
       return res.send({type: InteractionResponseType.PONG});
     }
@@ -298,6 +373,8 @@ app.post('/endpoll', upload.single('replay'), async function (req, res) {
     }
   }
 });
+*/
+
 app.listen(PORT, () => {
   console.log('Listening on port', PORT);
 });
