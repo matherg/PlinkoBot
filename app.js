@@ -213,17 +213,19 @@ client.on('interactionCreate', async interaction => {
       const pollOptions = optionsString.split(',').map(option => option.trim());
 
       const components = createPollButtons(pollOptions);
-      nextPollId++;
       polls[nextPollId] = { options: {}, voters: {}, userDetails: {}, pollOptions: pollOptions };
+
+      nextPollId++;
 
       await interaction.reply({
         content: 'Vote Now!',
         components: components
       });
+      const replyMessage = await interaction.fetchReply();
 
-      pollMessages[nextPollId] = {
+      pollMessages[nextPollId -1] = {
         channelId: interaction.channelId,
-        messageId: interaction.message.id
+        messageId: replyMessage.id
       };
     }
   }
