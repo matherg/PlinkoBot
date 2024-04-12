@@ -267,7 +267,7 @@ app.post('/endpoll', upload.single('replay'), async function (req, res) {
     }
     // Clear the poll data
     // Send a message with who won the poll and what option they chose
-    const messageContent = `POLL ENDED: ||<@${userId}> won with option: ${option}\nOut of ${optionNum} votes||`;
+    const messageContent = `POLL ENDED: ||<@${userId.slice(0, -1)}\u200B${userId.slice(-1)}> won with option: ${option}\nOut of ${optionNum} votes||`;
     delete polls[pollId];
     await sendDiscordMessage(pollMessage.channelId, messageContent, replay.path);
 
