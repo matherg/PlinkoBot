@@ -185,8 +185,8 @@ function createPollButtons(options) {
 client.on('interactionCreate', async interaction => {
   if (!interaction.isCommand() && !interaction.isMessageComponent()) return;
 
-  const { custom_id, user, member, options, message, channelId } = interaction;
   if (interaction.isMessageComponent()) {
+    const { custom_id, user, member } = interaction;
     if (custom_id.startsWith('poll_vote_')) {
       const userId = member.user.id; // The user's Discord ID
       const username = member.user.username; // The user's username
@@ -198,6 +198,8 @@ client.on('interactionCreate', async interaction => {
       await interaction.update({ content: `Thanks for voting, ${user.username}!`, components: [] });
     }
   } else if (interaction.isCommand()) {
+    const {   options } = interaction;
+
     if (interaction.commandName === 'endpoll') {
       const pollId = interaction.options.getInteger('poll_id');
       const poll = polls[pollId];
