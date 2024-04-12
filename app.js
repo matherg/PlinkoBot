@@ -53,53 +53,7 @@ const pollMessages = {};
 const polls = {};
 let nextPollId = 0;
 
-/*
-async function sendDiscordMessage(channelId, content, videoPath) {
-  const url = `https://discord.com/api/v10/channels/${channelId}/messages`;
-  const formData = new FormData();
-  formData.append('payload_json', JSON.stringify({ content }));
 
-  // Append the video file
-  formData.append('files[0]', fs.createReadStream(videoPath));
-
-
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bot ${process.env.DISCORD_TOKEN}`,
-      //...formData.getHeaders()
-    },
-    body: formData
-  });
-console.log(formData);
-  if (!response.ok) {
-    console.log(response);
-    throw new Error(`Failed to send message: ${response.statusText}`);
-  }
-  console.log(response)
-
-  fs.unlink(videoPath, (err) => {
-    if (err) {
-      console.error(`Error deleting file ${videoPath}: ${err}`);
-    } else {
-      console.log(`File ${videoPath} was deleted successfully`);
-    }
-  });
-}
-async function deleteDiscordMessage(channelId, messageId) {
-  const url = `https://discord.com/api/v10/channels/${channelId}/messages/${messageId}`;
-  const response = await fetch(url, {
-    method: 'DELETE',
-    headers: {
-      Authorization: `Bot ${process.env.DISCORD_TOKEN}`
-    }
-  });
-
-  if (!response.ok) {
-    // Handle any errors if the request was not successful
-    throw new Error(`Failed to delete message: ${response.statusText}`);
-  }
-}*/
 async function sendDiscordMessage(channelId, content, videoPath) {
   try {
     const channel = await client.channels.fetch(channelId);
@@ -189,7 +143,7 @@ client.on('interactionCreate', async interaction => {
 
    if (interaction.isMessageComponent()) {
     const { customId, user, member } = interaction;
-    console.log(interaction)
+   // console.log(interaction)
     if (customId.startsWith('poll_vote_')) {
       const userId = member.user.id; // The user's Discord ID
       const username = member.user.username; // The user's username
@@ -218,7 +172,7 @@ client.on('interactionCreate', async interaction => {
       const pollOptions = optionsString.split(',').map(option => option.trim());
 
       const components = createPollButtons(pollOptions);
-      polls[nextPollId] = { options: {}, guild: interaction.guildId, voters: {}, userDetails: {}, pollOptions: pollOptions };
+      polls[nextPollId] = { options: {},  voters: {}, userDetails: {}, pollOptions: pollOptions };
 
       nextPollId++;
 
@@ -230,6 +184,7 @@ client.on('interactionCreate', async interaction => {
 
       pollMessages[nextPollId -1] = {
         channelId: interaction.channelId,
+        guildId: interaction.guildId,
         messageId: replyMessage.id
       };
     }
@@ -269,7 +224,8 @@ app.post('/endpoll', upload.single('replay'), async function (req, res) {
     }
     // Clear the poll data
     // Send a message with who won the poll and what option they chose
-    const guild = await client.guilds.fetch(polls[pollId].guildId);
+    console.log(pollMessage.guildId)
+    const guild = await client.guilds.fetch(pollMessage.guildId);
     const member = await guild.members.fetch(userId);
     const messageContent = `POLL ENDED: || ${member}>  won with option: ${option}\nOut of ${optionNum} votes||`;
     await sendDiscordMessage(pollMessage.channelId, messageContent, replay.path);
@@ -282,107 +238,7 @@ app.post('/endpoll', upload.single('replay'), async function (req, res) {
   }
 });
 
-   /*
-  app.post('/interactions',express.json({ verify: VerifyDiscordRequest(process.env.PUBLIC_KEY) }), async function (req, res) {
-    // Interaction type and data
-    const {type, data, member, channel_id} = req.body;
 
-    if (type === InteractionType.PING) {
-      return res.send({type: InteractionResponseType.PONG});
-    }
-
-
-    if (type === InteractionType.MESSAGE_COMPONENT) {
-      const { custom_id } = data;
-
-      if (custom_id.startsWith('poll_vote_')) {
-        const userId = member.user.id; // The user's Discord ID
-        const username = member.user.username; // The user's username
-        const avatar = member.user.avatar; // The user's avatar hash
-        const avatarURL = `https://cdn.discordapp.com/avatars/${userId}/${avatar}.png`; // Construct the URL for the avatar
-
-        handleVote(custom_id, userId, username, avatarURL);
-
-        // Acknowledge the button click without sending a message
-        return res.send({ type: InteractionResponseType.DEFERRED_UPDATE_MESSAGE });
-      }
-    }
-
-  if (type === InteractionType.APPLICATION_COMMAND) {
-    const {name} = data;
-
-    if (name === 'endpoll') {
-      let pollId = data.options?.find(option => option.name === 'id')?.value || nextPollId-1;
-
-      const pollData = polls[pollId];
-      if (pollData) {
-        const pollMessage = pollMessages[pollId];
-        if (pollMessage) {
-          deleteDiscordMessage(pollMessage.channelId, pollMessage.messageId);
-          delete pollMessages[pollId];
-        }
-
-        delete polls[pollId];
-
-        return res.send({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: 'The poll has ended.',
-          },
-        });
-      } else {
-        return res.send({
-          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-          data: {
-            content: 'Poll not found or it has already ended.',
-          },
-        });
-      }
-    }
-    if (name === 'plinko_poll') {
-      // Create buttons for the poll
-      const optionsString = data.options.find(option => option.name === 'options').value;
-      const pollOptions = optionsString.split(',').map(option => option.trim()); // Split and trim options
-
-      // Dynamic creation of buttons based on user input
-      const components = createPollButtons(pollOptions);
-      nextPollId += 1;
-      polls[nextPollId - 1] = { options: {}, voters: {}, userDetails: {}, pollOptions: pollOptions };
-
-      const response = await fetch(`https://discord.com/api/v10/channels/${channel_id}/messages`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bot ${process.env.DISCORD_TOKEN}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          content: 'Vote Now!', // Prompt message for voting
-          components: components
-        })
-      });
-
-      // If response is ok, parse the response
-      if (response.ok) {
-        const pollMessage = await response.json(); // This automatically decompresses and parses JSON
-        // Store the channel ID and message ID of the poll
-        pollMessages[nextPollId -1] = {
-          channelId: channel_id,
-          messageId: pollMessage.id
-        };
-
-      } else {
-        console.error('Failed to send poll message:', await response.text());
-      }
-
-      // Acknowledge the slash command with a deferred message
-      console.log("sending reply")
-      return res.send({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE
-      });
-    }
-  }
-});
-*/
 
 app.listen(PORT, () => {
   console.log('Listening on port', PORT);
