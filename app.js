@@ -227,7 +227,7 @@ app.post('/endpoll', upload.single('replay'), async function (req, res) {
     console.log(pollMessage.guildId)
     const guild = await client.guilds.fetch(pollMessage.guildId);
     const member = await guild.members.fetch(userId);
-    const messageContent = `POLL ENDED: || ${member}>  won with option: ${option}\nOut of ${optionNum} votes||`;
+    const messageContent = `POLL ENDED: || ${member}  won with option: ${option}\nOut of ${optionNum} votes||`;
     await sendDiscordMessage(pollMessage.channelId, messageContent, replay.path);
     delete polls[pollId];
 
