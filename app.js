@@ -185,7 +185,7 @@ function createPollButtons(options) {
 client.on('interactionCreate', async interaction => {
   if (!interaction.isCommand() && !interaction.isMessageComponent()) return;
 
-  const { custom_id, user, member, message, channelId } = interaction;
+  const { custom_id, user, member, options, message, channelId } = interaction;
   if (interaction.isMessageComponent()) {
     if (custom_id.startsWith('poll_vote_')) {
       const userId = member.user.id; // The user's Discord ID
