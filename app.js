@@ -187,6 +187,7 @@ client.on('interactionCreate', async interaction => {
 
   if (interaction.isMessageComponent()) {
     const { custom_id, user, member } = interaction;
+    console.log(interaction)
     if (custom_id.startsWith('poll_vote_')) {
       const userId = member.user.id; // The user's Discord ID
       const username = member.user.username; // The user's username
