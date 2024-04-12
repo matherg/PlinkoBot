@@ -51,6 +51,7 @@ const upload = multer(
 const pollMessages = {};
 const polls = {};
 let nextPollId = 0;
+
 /*
 async function sendDiscordMessage(channelId, content, videoPath) {
   const url = `https://discord.com/api/v10/channels/${channelId}/messages`;
@@ -216,7 +217,7 @@ client.on('interactionCreate', async interaction => {
       const pollOptions = optionsString.split(',').map(option => option.trim());
 
       const components = createPollButtons(pollOptions);
-      polls[nextPollId] = { options: {}, voters: {}, userDetails: {}, pollOptions: pollOptions };
+      polls[nextPollId] = { options: {}, guild: interaction.guildId, voters: {}, userDetails: {}, pollOptions: pollOptions };
 
       nextPollId++;
 
@@ -267,9 +268,11 @@ app.post('/endpoll', upload.single('replay'), async function (req, res) {
     }
     // Clear the poll data
     // Send a message with who won the poll and what option they chose
-    const messageContent = `POLL ENDED: ||<@${userId.slice(0, -1)}\u200B${userId.slice(-1)}> won with option: ${option}\nOut of ${optionNum} votes||`;
-    delete polls[pollId];
+    const guild = await client.guilds.fetch(polls[pollId].guildId);
+    const member = await guild.members.fetch(userId);
+    const messageContent = `POLL ENDED: || ${member}>  won with option: ${option}\nOut of ${optionNum} votes||`;
     await sendDiscordMessage(pollMessage.channelId, messageContent, replay.path);
+    delete polls[pollId];
 
     res.setHeader('Access-Control-Allow-Origin', 'https://master--plinkopoll.netlify.app');
     res.json({ message: 'Poll ended successfully, winner announced.' });
