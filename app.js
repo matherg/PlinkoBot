@@ -185,16 +185,16 @@ function createPollButtons(options) {
 client.on('interactionCreate', async interaction => {
   if (!interaction.isCommand() && !interaction.isMessageComponent()) return;
 
-  if (interaction.isMessageComponent()) {
-    const { custom_id, user, member } = interaction;
+   if (interaction.isMessageComponent()) {
+    const { customId, user, member } = interaction;
     console.log(interaction)
-    if (custom_id.startsWith('poll_vote_')) {
+    if (customId.startsWith('poll_vote_')) {
       const userId = member.user.id; // The user's Discord ID
       const username = member.user.username; // The user's username
       const avatar = member.user.avatar; // The user's avatar hash
       const avatarURL = `https://cdn.discordapp.com/avatars/${userId}/${avatar}.png`; // Construct the URL for the avatar
 
-      handleVote(custom_id, userId, username, avatarURL);
+      handleVote(customId, userId, username, avatarURL);
 
       await interaction.update({ content: `Thanks for voting, ${user.username}!`, components: [] });
     }
