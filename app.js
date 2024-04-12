@@ -101,7 +101,7 @@ async function deleteDiscordMessage(channelId, messageId) {
 async function sendDiscordMessage(channelId, content, videoPath) {
   try {
     const channel = await client.channels.fetch(channelId);
-    const file = new AttachmentBuilder('assets/replay.mp4', { name: 'replay.mp4' });
+    const file = new AttachmentBuilder(videoPath, { name: 'replay.mp4' });
     await channel.send({ content, files: [file] });
   } catch (error) {
     console.error('Error sending message:', error);
@@ -196,7 +196,7 @@ client.on('interactionCreate', async interaction => {
 
       handleVote(customId, userId, username, avatarURL);
 
-      await interaction.update({ content: `Thanks for voting, ${user.username}!`, components: [] });
+      await interaction.deferUpdate();
     }
   } else if (interaction.isCommand()) {
     const {   options } = interaction;
